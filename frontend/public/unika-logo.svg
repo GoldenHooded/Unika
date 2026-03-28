@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512" height="512" viewBox="0 0 100 100">
+  <defs>
+    <filter id="glow0" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.3765
+                0 0 0 0 0.6471
+                0 0 0 0 0.9804
+                0 0 0 0.7 0" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="glow1" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.6549
+                0 0 0 0 0.5451
+                0 0 0 0 0.9804
+                0 0 0 0.7 0" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="glow2" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.1333
+                0 0 0 0 0.8275
+                0 0 0 0 0.9333
+                0 0 0 0.7 0" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="glow3" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.5059
+                0 0 0 0 0.5490
+                0 0 0 0 0.9725
+                0 0 0 0.7 0" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="glow4" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.2196
+                0 0 0 0 0.7412
+                0 0 0 0 0.9725
+                0 0 0 0.7 0" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <polygon
+    points="50.0000,9.0000 14.4930,70.5000 85.5070,70.5000"
+    fill="#60A5FA" fill-opacity="0.10"
+    stroke="#60A5FA" stroke-width="1.1" stroke-opacity="0.9"
+    stroke-linejoin="round"
+    filter="url(#glow0)"
+  />
+  <polygon
+    points="62.3620,19.4029 17.3212,54.5927 70.3168,76.0044"
+    fill="#A78BFA" fill-opacity="0.16"
+    stroke="#A78BFA" stroke-width="1.5" stroke-opacity="0.9"
+    stroke-linejoin="round"
+    filter="url(#glow1)"
+  />
+  <polygon
+    points="68.5786,33.2717 26.2236,42.2746 55.1978,74.4537"
+    fill="#22D3EE" fill-opacity="0.20"
+    stroke="#22D3EE" stroke-width="1.9" stroke-opacity="0.9"
+    stroke-linejoin="round"
+    filter="url(#glow2)"
+  />
+  <polygon
+    points="41.0489,14.0991 23.3844,75.7024 85.5667,60.1986"
+    fill="#818CF8" fill-opacity="0.09"
+    stroke="#818CF8" stroke-width="1.0" stroke-opacity="0.9"
+    stroke-linejoin="round"
+    filter="url(#glow3)"
+  />
+  <polygon
+    points="66.6893,43.2571 35.8158,38.9181 47.4949,67.8248"
+    fill="#38BDF8" fill-opacity="0.26"
+    stroke="#38BDF8" stroke-width="2.3" stroke-opacity="0.9"
+    stroke-linejoin="round"
+    filter="url(#glow4)"
+  />
+</svg>

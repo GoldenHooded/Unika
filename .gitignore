@@ -1,0 +1,39 @@
+# ── Secrets & local config (NEVER commit) ─────────────────────────────────────
+.env
+settings.json
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.spec.bak
+.venv/
+venv/
+env/
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+node_modules/
+frontend/out/
+frontend/release/
+frontend/.vite/
+
+# ── Electron build artifacts ──────────────────────────────────────────────────
+frontend/release/
+
+# ── Data / RAG index (user data, not source) ──────────────────────────────────
+data/rag_index/
+
+# ── OS noise ──────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/settings.json
+*.suo
+*.user
