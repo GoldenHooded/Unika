@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from backend import settings as cfg
 from backend.agent import models, prompts
+from backend.agent.models import _ContentFilterError
 from backend.commands import registry
 from backend.commands.ask import resolve_ask
 from backend.events import bus
@@ -227,6 +228,14 @@ class UAgent:
 
             bus.emit({"type": "turn_start", "turn": turn, "model": self.active_model, "channel": self.channel})
 
+            # Defensive pre-flight: every message must be a dict.
+            # Guards against regressions of the _maybe_compact plain-string bug
+            # and any other code path that might accidentally insert a bare string.
+            messages = [
+                m if isinstance(m, dict) else {"role": "system", "content": str(m)}
+                for m in messages
+            ]
+
             # Call DeepSeek (pass stop_fn so the stream can be interrupted per-token)
             try:
                 text, tool_calls = models.stream_completion(
@@ -237,6 +246,42 @@ class UAgent:
                     channel=self.channel,
                     message_id=self._current_message_id,
                 )
+            except _ContentFilterError:
+                # DeepSeek content filter blocked the output.
+                # Retry once with a trimmed conversation (keep only the last user message)
+                # to eliminate any accumulated context that may have triggered the filter.
+                bus.emit({"type": "api_error", "channel": self.channel,
+                          "message": "Content filter triggered — retrying with trimmed context",
+                          "timestamp_ms": int(time.time() * 1000)})
+                try:
+                    # Build a minimal messages list: system + only the current user message
+                    last_user = next(
+                        (m for m in reversed(self._history) if m.get("role") == "user"), None
+                    )
+                    if last_user and not is_r1:
+                        retry_messages = [{"role": "system", "content": system_prompt}, last_user]
+                    else:
+                        retry_messages = messages
+                    text, tool_calls = models.stream_completion(
+                        messages=retry_messages,
+                        model=self.active_model,
+                        tools=tools if not is_r1 else None,
+                        stop_fn=lambda: self._is_stopped(),
+                        channel=self.channel,
+                        message_id=self._current_message_id,
+                    )
+                except Exception:
+                    # Both attempts failed — surface a friendly message to the user
+                    if self._history and self._history[-1].get("role") == "user":
+                        self._history.pop()
+                    notice = (
+                        "⚠️ El modelo ha bloqueado esta respuesta por su filtro de contenido. "
+                        "Prueba a reformular el mensaje."
+                    )
+                    bus.emit({"type": "content_filter_error", "channel": self.channel,
+                              "message": notice, "timestamp_ms": int(time.time() * 1000)})
+                    bus.emit({"type": "task_done", "message": "", "channel": self.channel})
+                    return ""
             except Exception as e:
                 # Remove the user message added before the failed call so history stays clean
                 if self._history and self._history[-1].get("role") == "user":
@@ -282,7 +327,11 @@ class UAgent:
                 messages = [{"role": "system", "content": system_prompt}] + self._history
 
             # Compact history if too long
-            messages = self._maybe_compact(messages, system_prompt if not is_r1 else None)
+            # IMPORTANT: pass the full message dict, NOT the raw string —
+            # _maybe_compact puts system_msg directly as messages[0] and the
+            # DeepSeek API rejects a plain string there.
+            _sys_msg = {"role": "system", "content": system_prompt} if not is_r1 else None
+            messages = self._maybe_compact(messages, _sys_msg)
 
         else:
             bus.emit({"type": "max_turns_reached", "channel": self.channel})

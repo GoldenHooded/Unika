@@ -366,6 +366,13 @@ export function useWebSocket() {
         pushDebugEvent({ phase: 'api_error', timestamp_ms: Date.now(), ...data })
         break
 
+      case 'content_filter_error':
+        // DeepSeek content filter blocked the output after both attempts failed
+        pushDebugEvent({ phase: 'content_filter', timestamp_ms: Date.now(), ...data })
+        closeStreamingState()
+        appendAssistantNotice(data.message ?? '⚠️ El modelo bloqueó esta respuesta por su filtro de contenido. Prueba a reformular el mensaje.')
+        break
+
       case 'max_turns_reached':
         pushDebugEvent({
           phase: 'max_turns_reached',

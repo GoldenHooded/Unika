@@ -75,8 +75,8 @@ def stream_completion(
             if attempt < MAX_RETRIES - 1:
                 time.sleep(2)
                 continue
-        except _ContextLengthError:
-            raise
+        except (_ContextLengthError, _ContentFilterError):
+            raise  # never retry these — they are deterministic failures
         except Exception as e:
             raise RuntimeError(f"DeepSeek API error: {e}") from e
 
@@ -84,6 +84,11 @@ def stream_completion(
 
 
 class _ContextLengthError(Exception):
+    pass
+
+
+class _ContentFilterError(Exception):
+    """Raised when DeepSeek blocks the output via its content-filtering policy."""
     pass
 
 
@@ -111,6 +116,8 @@ def _do_stream(
                 body = response.read().decode()
                 if "context" in body.lower() or "length" in body.lower():
                     raise _ContextLengthError(body)
+                if "content filtering" in body.lower() or "content_filter" in body.lower() or "output blocked" in body.lower():
+                    raise _ContentFilterError(body)
                 raise RuntimeError(f"DeepSeek 400 error: {body}")
             if response.status_code != 200:
                 body = response.read().decode()
