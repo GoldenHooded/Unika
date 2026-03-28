@@ -22,6 +22,7 @@ export function useWebSocket() {
   const setStreaming = useChatStore(s => s.setStreaming)
   const addCommandToMessage    = useChatStore(s => s.addCommandToMessage)
   const updateCommandInMessage = useChatStore(s => s.updateCommandInMessage)
+  const setAgentStatus         = useChatStore(s => s.setAgentStatus)
   const setAskPending = useChatStore(s => s.setAskPending)
   const setProjects = useProjectStore(s => s.setProjects)
   const setActiveProject = useProjectStore(s => s.setActiveProject)
@@ -37,6 +38,46 @@ export function useWebSocket() {
       if (msgs[i].role === 'assistant') return msgs[i].id
     }
     return null
+  }
+
+  // ── Human-readable status line from a command_start event ──────────────────
+  const commandToStatus = (name: string, args: Record<string, any>): string => {
+    const filename = String(args.path ?? args.file_path ?? '').split(/[\\/]/).pop() ?? ''
+    const objName  = String(args.name ?? args.object_name ?? args.game_object ?? '')
+    const trim     = (s: string, n = 36) => s.length > n ? s.slice(0, n) + '…' : s
+
+    switch (name) {
+      case 'FILE_READ':         return filename ? `Leyendo ${filename}` : 'Leyendo archivo'
+      case 'FILE_WRITE':        return filename ? `Escribiendo ${filename}` : 'Escribiendo archivo'
+      case 'FILE_EDIT':         return filename ? `Editando ${filename}` : 'Editando archivo'
+      case 'FILE_EDIT_SECTION': return filename ? `Editando sección en ${filename}` : 'Editando sección'
+      case 'FILE_APPEND':       return filename ? `Añadiendo a ${filename}` : 'Añadiendo al archivo'
+      case 'FILE_DELETE':       return filename ? `Eliminando ${filename}` : 'Eliminando archivo'
+      case 'FILE_LIST':         return 'Listando archivos del proyecto'
+      case 'UNITY_COMPILE':     return 'Compilando el proyecto...'
+      case 'UNITY_READ_CONSOLE':return 'Leyendo consola de Unity'
+      case 'UNITY_GET_HIERARCHY':return 'Inspeccionando la jerarquía'
+      case 'UNITY_GET_ASSETS':  return 'Buscando assets'
+      case 'UNITY_SETUP':       return 'Configurando Unity'
+      case 'UNITY_PLAY':        return 'Iniciando Play Mode'
+      case 'UNITY_GET_OBJECT':  return objName ? `Inspeccionando ${objName}` : 'Inspeccionando objeto'
+      case 'UNITY_CREATE_OBJECT':return objName ? `Creando ${objName}` : 'Creando objeto'
+      case 'UNITY_DELETE_OBJECT':return objName ? `Eliminando ${objName}` : 'Eliminando objeto'
+      case 'UNITY_SET_PROPERTY':return objName ? `Modificando ${objName}` : 'Modificando propiedad'
+      case 'UNITY_SWITCH_SCENE':return args.scene ? `Abriendo escena ${args.scene}` : 'Cambiando escena'
+      case 'UNITY_CREATE_SCRIPT':return args.script_name ? `Creando script ${args.script_name}` : 'Creando script'
+      case 'SHELL': {
+        const cmd = String(args.command ?? '').trim()
+        return cmd ? `> ${trim(cmd, 40)}` : 'Ejecutando comando de shell'
+      }
+      case 'SEARCH': {
+        const q = String(args.query ?? '').trim()
+        return q ? `Buscando: ${trim(q)}` : 'Buscando en la web'
+      }
+      case 'WAIT':  return `Esperando ${args.seconds ?? ''}s`
+      case 'ASK':   return 'Esperando respuesta del usuario'
+      default:      return name.replace(/_/g, ' ').toLowerCase()
+    }
   }
 
   const pushDebugEvent = useCallback((event: any) => {
@@ -302,6 +343,8 @@ export function useWebSocket() {
         } else {
           addCommandToMessage(msgId, { id: data.id, name: data.name, args: data.args ?? {}, status: 'running' })
         }
+        // Show live status text in the activity bar
+        setAgentStatus(commandToStatus(data.name, data.args ?? {}))
         break
       }
 
@@ -344,12 +387,14 @@ export function useWebSocket() {
 
       case 'task_done': {
         closeStreamingState()
+        setAgentStatus('')
         if (!data.cancelled) playSound('done')
         break
       }
 
       case 'task_interrupted':
         closeStreamingState()
+        setAgentStatus('')
         break
 
       case 'task_failed':
@@ -446,6 +491,7 @@ export function useWebSocket() {
     setStreaming,
     addCommandToMessage,
     updateCommandInMessage,
+    setAgentStatus,
     setAskPending,
     setProjects,
     setActiveProject,

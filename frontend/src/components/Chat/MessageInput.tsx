@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { Send, Square, Zap, Brain, ListPlus, Bug, ClipboardList } from 'lucide-react'
 import { useChatStore } from '../../stores/chatStore'
+import { ActivityBar } from './ActivityBar'
 import { useUnityStore } from '../../stores/unityStore'
 import { useDebugStore } from '../../stores/debugStore'
 import { useProjectStore } from '../../stores/projectStore'
@@ -17,7 +18,8 @@ export function MessageInput({ onSend }: { onSend: (data: object) => void }) {
     try { return localStorage.getItem(draftKey(activeProjectId, activeConversationId)) ?? '' }
     catch { return '' }
   })
-  const streaming = useChatStore(s => s.streaming)
+  const streaming    = useChatStore(s => s.streaming)
+  const agentStatus  = useChatStore(s => s.agentStatus)
   const activeModel = useUnityStore(s => s.activeModel)
   const setActiveModel = useUnityStore(s => s.setActiveModel)
   const debugEnabled = useDebugStore(s => s.enabled)
@@ -158,6 +160,9 @@ export function MessageInput({ onSend }: { onSend: (data: object) => void }) {
           Shift+Enter nueva línea
         </span>
       </div>
+
+      {/* Live agent activity — typewriter status strip */}
+      {streaming && <ActivityBar text={agentStatus} />}
 
       {/* Input row — Unity input field style */}
       <div

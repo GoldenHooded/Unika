@@ -32,6 +32,7 @@ interface ChatStore {
   messages: ChatMessage[]
   streaming: boolean
   askPending: AskPending | null
+  agentStatus: string          // live one-liner shown while a command is running
 
   addMessage: (msg: ChatMessage) => void
   appendToken: (token: string) => void
@@ -48,12 +49,14 @@ interface ChatStore {
   updateCommandInMessage: (messageId: string, cmdId: string, updates: Partial<CommandItem>) => void
 
   setAskPending: (ask: AskPending | null) => void
+  setAgentStatus: (text: string) => void
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
   messages: [],
   streaming: false,
   askPending: null,
+  agentStatus: '',
 
   addMessage: (msg) =>
     set((s) => ({ messages: [...s.messages, { ...msg, ts: msg.ts ?? Date.now() }] })),
@@ -138,4 +141,5 @@ export const useChatStore = create<ChatStore>((set) => ({
     })),
 
   setAskPending: (ask) => set({ askPending: ask }),
+  setAgentStatus: (text) => set({ agentStatus: text }),
 }))
