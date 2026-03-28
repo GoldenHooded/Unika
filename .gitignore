@@ -24,8 +24,12 @@ frontend/.vite/
 # ── Electron build artifacts ──────────────────────────────────────────────────
 frontend/release/
 
-# ── Data / RAG index (user data, not source) ──────────────────────────────────
-data/rag_index/
+# ── Data / user projects (runtime data, not source) ───────────────────────────
+data/
+Assets/
+
+# ── Stray generated scripts ────────────────────────────────────────────────────
+DemoSystem.cs
 
 # ── OS noise ──────────────────────────────────────────────────────────────────
 .DS_Store
