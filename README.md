@@ -177,4 +177,10 @@ This produces:
 
 ## License
 
-This project is currently unlicensed. All rights reserved.
+Copyright (c) 2026 Íker Giner Cañavate. All rights reserved.
+
+This project is licensed under the [Elastic License 2.0](LICENSE).
+
+You are free to use, modify, and redistribute this software. However, **you may not offer it as a hosted/managed service or sell it commercially without explicit permission from the author.**
+
+For commercial licensing inquiries: iker.giner.canavate@gmail.com
