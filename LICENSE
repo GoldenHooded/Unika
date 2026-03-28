@@ -1,6 +1,35 @@
-Elastic License 2.0
+Elastic License 2.0 + Commons Clause
 
 Copyright (c) 2026 Íker Giner Cañavate. All rights reserved.
+
+Commons Clause Restriction
+
+The Software is provided to you by the Licensor under the Elastic License 2.0,
+as defined below, subject to the following condition:
+
+Without limiting other conditions in the Elastic License 2.0, the grant of
+rights under the license will not include, and the license does not grant to
+you, the right to Sell the Software or any Derivative Works.
+
+For purposes of the foregoing, "Sell" means practicing any or all of the rights
+granted to you under the license to provide to third parties, for a fee or other
+consideration (including without limitation fees for hosting or consulting/
+support services related to the Software), a product or service whose value
+derives, entirely or substantially, from the functionality of the Software or
+any Derivative Work thereof.
+
+"Derivative Works" means any work that is based on the Software, including but
+not limited to modifications, adaptations, translations, or any other work
+derived from or incorporating any part of the Software.
+
+Any licenses granted under the Elastic License 2.0 are conditioned on your
+compliance with this Commons Clause Restriction. If you wish to obtain a
+commercial license to sell the Software or any Derivative Works, you must
+obtain explicit prior written permission from the copyright holder:
+iker.giner.canavate@gmail.com
+
+---
+
 
 Acceptance
 By using the software, you agree to all of the terms and conditions below.
