@@ -71,7 +71,7 @@ export function AskPanel({ pending, onSend }: { pending: AskPending; onSend: (da
           ) : null}
           {(q.allow_custom || !q.options?.length) && (
             <input
-              className="w-full bg-[#2A2A2A] text-white text-xs px-3 py-2 rounded border border-[#3A3A3A] focus:border-[#3d85c8] outline-none"
+              className="w-full bg-[#222228] text-white text-xs px-3 py-2 rounded border border-[#3A3A3A] focus:border-[#3d85c8] outline-none"
               placeholder="Tu respuesta..."
               value={answers[qi]}
               onChange={e => {

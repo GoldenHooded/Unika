@@ -50,13 +50,13 @@ export function Sidebar({ onSend, onOpenProject, onOpenSettings }: SidebarProps)
   const otherProjects = projects.filter(p => p.id !== activeProjectId)
 
   return (
-    /* Unity Hierarchy panel: bg #282828, header #3C3C3C, border #3A3A3A */
-    <aside className="w-52 flex-shrink-0 flex flex-col h-full select-none border-r border-[#3A3A3A]"
-           style={{ background: '#282828' }}>
+    /* Unity Hierarchy panel: bg #1e1e22, header #28282e, border #3A3A3A */
+    <aside className="w-52 flex-shrink-0 flex flex-col h-full select-none border-r border-white/[0.07]"
+           style={{ background: '#1e1e22' }}>
 
       {/* Header — Unity toolbar style */}
-      <div className="h-7 flex items-center px-3 gap-2 border-b border-[#3A3A3A] drag-region flex-shrink-0"
-           style={{ background: '#3C3C3C' }}>
+      <div className="h-7 flex items-center px-3 gap-2 border-b border-white/[0.07] drag-region flex-shrink-0"
+           style={{ background: '#28282e' }}>
         <UnikaLogo size={14} />
         <span className="text-[11px] font-semibold text-[#EEEEEE] tracking-wide">Unika</span>
       </div>
@@ -67,8 +67,8 @@ export function Sidebar({ onSend, onOpenProject, onOpenSettings }: SidebarProps)
         {activeProject && (
           <div className="mb-1">
             {/* Project label — like Unity Hierarchy scene name */}
-            <div className="flex items-center gap-1 px-2 py-[3px] border-b border-[#3A3A3A] mb-0.5"
-                 style={{ background: '#3C3C3C' }}>
+            <div className="flex items-center gap-1 px-2 py-[3px] border-b border-white/[0.07] mb-0.5"
+                 style={{ background: '#28282e' }}>
               <FolderOpen size={11} className="text-[#3d85c8] flex-shrink-0" />
               <span className="text-[11px] font-semibold text-[#EEEEEE] truncate flex-1"
                     title={activeProject.name}>
@@ -97,7 +97,7 @@ export function Sidebar({ onSend, onOpenProject, onOpenSettings }: SidebarProps)
                   : undefined}
                 onMouseEnter={e => {
                   if (activeConversationId !== conv.id)
-                    (e.currentTarget as HTMLElement).style.background = '#3C3C3C'
+                    (e.currentTarget as HTMLElement).style.background = '#28282e'
                 }}
                 onMouseLeave={e => {
                   if (activeConversationId !== conv.id)
@@ -117,7 +117,7 @@ export function Sidebar({ onSend, onOpenProject, onOpenSettings }: SidebarProps)
                 <input
                   autoFocus
                   className="w-full text-[11px] px-2 py-1 rounded border outline-none placeholder-[#888]"
-                  style={{ background: '#2A2A2A', borderColor: '#3d85c8', color: '#EEEEEE' }}
+                  style={{ background: '#222228', borderColor: '#3d85c8', color: '#EEEEEE' }}
                   placeholder="Nombre de la conversación…"
                   value={newConvName}
                   onChange={e => setNewConvName(e.target.value)}
@@ -131,7 +131,7 @@ export function Sidebar({ onSend, onOpenProject, onOpenSettings }: SidebarProps)
             ) : (
               <div
                 className="flex items-center gap-1.5 pl-5 pr-2 py-[3px] cursor-pointer text-[#888] transition-colors hover:text-[#C4C4C4]"
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#3C3C3C' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#28282e' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '' }}
                 onClick={() => setShowNewConv(activeProject.id)}
               >
@@ -144,7 +144,7 @@ export function Sidebar({ onSend, onOpenProject, onOpenSettings }: SidebarProps)
 
         {/* ── Other recent projects ── */}
         {otherProjects.length > 0 && (
-          <div className="mt-1 border-t border-[#3A3A3A] pt-1">
+          <div className="mt-1 border-t border-white/[0.07] pt-1">
             <div className="px-2 pb-1">
               <span className="text-[10px] text-[#888] uppercase tracking-widest">Recientes</span>
             </div>
@@ -152,7 +152,7 @@ export function Sidebar({ onSend, onOpenProject, onOpenSettings }: SidebarProps)
               <div key={project.id}>
                 <div
                   className="flex items-center gap-1 px-2 py-[3px] cursor-pointer text-[#C4C4C4] transition-colors"
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#3C3C3C' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#28282e' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '' }}
                   onClick={() => toggleCollapse(project.id)}
                 >
@@ -169,7 +169,7 @@ export function Sidebar({ onSend, onOpenProject, onOpenSettings }: SidebarProps)
                       <div
                         key={conv.id}
                         className="flex items-center gap-1.5 pl-5 pr-2 py-[3px] cursor-pointer text-[#888] transition-colors hover:text-[#C4C4C4]"
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#3C3C3C' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#28282e' }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '' }}
                         onClick={() => selectConversation(project.id, conv.id)}
                       >
@@ -186,13 +186,13 @@ export function Sidebar({ onSend, onOpenProject, onOpenSettings }: SidebarProps)
       </div>
 
       {/* Bottom actions — Unity toolbar button style */}
-      <div className="border-t border-[#3A3A3A] p-1.5 space-y-0.5 flex-shrink-0"
-           style={{ background: '#3C3C3C' }}>
+      <div className="border-t border-white/[0.07] p-1.5 space-y-0.5 flex-shrink-0"
+           style={{ background: '#28282e' }}>
         <button
           className="w-full flex items-center gap-2 px-2 py-1 rounded text-[11px] font-medium transition-colors"
-          style={{ color: '#EEEEEE', background: '#585858', border: '1px solid #303030' }}
+          style={{ color: '#EEEEEE', background: '#4a4a54', border: '1px solid #1e1e26' }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#676767' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#585858' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#4a4a54' }}
           onClick={onOpenProject}
         >
           <FolderOpen size={12} />
@@ -201,7 +201,7 @@ export function Sidebar({ onSend, onOpenProject, onOpenSettings }: SidebarProps)
         <button
           className="w-full flex items-center gap-2 px-2 py-1 rounded text-[11px] transition-colors"
           style={{ color: '#C4C4C4' }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#585858' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#4a4a54' }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '' }}
           onClick={onOpenSettings}
         >

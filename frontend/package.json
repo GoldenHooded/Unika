@@ -51,6 +51,7 @@
     "@codemirror/lang-markdown": "^6.2.5",
     "@codemirror/theme-one-dark": "^6.1.2",
     "@codemirror/view": "^6.26.3",
+    "@fontsource/inter": "^5.2.8",
     "@radix-ui/react-context-menu": "^2.2.2",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-dropdown-menu": "^2.1.2",

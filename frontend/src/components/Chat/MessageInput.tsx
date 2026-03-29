@@ -111,7 +111,7 @@ export function MessageInput({ onSend }: { onSend: (data: object) => void }) {
 
   return (
     /* Unity-style input area — bg #282828, input field #2A2A2A, border #3A3A3A */
-    <div className="flex-shrink-0 px-3 py-2 border-t" style={{ borderColor: '#3A3A3A', background: '#282828' }}>
+    <div className="flex-shrink-0 px-4 py-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)', background: '#1e1e22' }}>
 
       {/* Model + hint row */}
       <div className="flex items-center gap-2 mb-1.5">
@@ -168,8 +168,8 @@ export function MessageInput({ onSend }: { onSend: (data: object) => void }) {
       <div
         className="flex items-end gap-2 rounded relative"
         style={{
-          background: '#2A2A2A',
-          border: dragOver ? '1px solid #3d85c8' : '1px solid #3A3A3A',
+          background: '#222228',
+          border: dragOver ? '1px solid rgba(59,130,246,0.6)' : '1px solid rgba(255,255,255,0.08)',
           transition: 'border-color 0.15s',
         }}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}

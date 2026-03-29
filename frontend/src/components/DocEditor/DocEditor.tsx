@@ -87,11 +87,11 @@ export function DocEditor({ onSend: _onSend }: { onSend?: (data: object) => void
 
   return (
     /* Unity Inspector-style panel */
-    <div className="flex flex-col h-full" style={{ background: '#282828', fontSize: 11 }}>
+    <div className="flex flex-col h-full" style={{ background: '#1e1e22', fontSize: 11 }}>
 
       {/* Toolbar — Unity tab bar style */}
       <div className="flex items-center border-b flex-shrink-0"
-           style={{ borderColor: '#3A3A3A', background: '#3C3C3C', minHeight: 24 }}>
+           style={{ borderColor: 'rgba(255,255,255,0.07)', background: '#28282e', minHeight: 24 }}>
 
         {/* Doc tabs — Unity tab style: active tab shows bg panel color with top accent border */}
         <div className="flex flex-1 overflow-x-auto">
@@ -101,8 +101,8 @@ export function DocEditor({ onSend: _onSend }: { onSend?: (data: object) => void
               onClick={() => setActiveDoc(d.name)}
               className="flex items-center px-3 py-1 text-[11px] transition-colors flex-shrink-0 border-r"
               style={{
-                borderColor: '#3A3A3A',
-                background: activeDoc === d.name ? '#282828' : 'transparent',
+                borderColor: 'rgba(255,255,255,0.07)',
+                background: activeDoc === d.name ? '#1e1e22' : 'transparent',
                 color: activeDoc === d.name ? '#EEEEEE' : '#C4C4C4',
                 borderTop: activeDoc === d.name ? '1px solid #3d85c8' : '1px solid transparent',
               }}
@@ -123,7 +123,7 @@ export function DocEditor({ onSend: _onSend }: { onSend?: (data: object) => void
         {(activeDoc as string) !== 'BOARD' && (
           <>
             {/* View mode buttons — Unity toolbar icon buttons */}
-            <div className="flex items-center gap-0.5 px-1.5 border-l" style={{ borderColor: '#3A3A3A' }}>
+            <div className="flex items-center gap-0.5 px-1.5 border-l" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
               {[
                 { m: 'edit' as const, Icon: Code2, title: 'Editar' },
                 { m: 'split' as const, Icon: SplitSquareHorizontal, title: 'Split' },
@@ -155,7 +155,7 @@ export function DocEditor({ onSend: _onSend }: { onSend?: (data: object) => void
               onClick={save}
               disabled={saving}
               className="flex items-center gap-1 px-2 py-1 text-[11px] border-l transition-colors"
-              style={{ borderColor: '#3A3A3A', color: '#888' }}
+              style={{ borderColor: 'rgba(255,255,255,0.07)', color: '#888' }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLElement).style.background = '#474747'
                 ;(e.currentTarget as HTMLElement).style.color = '#EEEEEE'
@@ -187,9 +187,9 @@ export function DocEditor({ onSend: _onSend }: { onSend?: (data: object) => void
               <textarea
                 className={`${mode === 'split' ? 'w-1/2 border-r' : 'w-full'} h-full resize-none outline-none scrollbar-thin p-3 font-mono text-[11px]`}
                 style={{
-                  background: '#1C1C1C',
+                  background: '#141418',
                   color: '#D2D2D2',
-                  borderColor: '#3A3A3A',
+                  borderColor: 'rgba(255,255,255,0.07)',
                   lineHeight: '1.6',
                 }}
                 value={content}
@@ -203,7 +203,7 @@ export function DocEditor({ onSend: _onSend }: { onSend?: (data: object) => void
                 <div
                   ref={previewRef}
                   className="h-full overflow-y-auto p-4 scrollbar-thin"
-                  style={{ background: '#282828' }}
+                  style={{ background: '#1e1e22' }}
                 >
                   <div className="prose prose-invert prose-sm max-w-none">
                     {extractGuiElements(content).map((part, i) =>

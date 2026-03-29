@@ -68,7 +68,7 @@ export function MessageList({ onSend }: { onSend: (data: object) => void }) {
   }, [messages])
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 scrollbar-thin">
+    <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4 scrollbar-thin">
       {messages.map((msg) => (
         <ErrorBoundary key={msg.id}>
           <MessageRow msg={msg} onSend={onSend} />
@@ -130,7 +130,7 @@ const MessageRow = React.memo(function MessageRow({
       {/* Message bubble */}
       <div className={`flex gap-3 group msg-appear relative ${isUser ? 'justify-end' : 'justify-start'}`}>
         {!isUser && (
-          <div className="w-7 h-7 rounded flex-shrink-0 bg-[#1a1f2e] border border-[#2d3a52] flex items-center justify-center mt-1 overflow-hidden">
+          <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center mt-0.5 overflow-hidden" style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)' }}>
             <img
               src="/unika-logo.png"
               alt="Unika"
@@ -151,11 +151,14 @@ const MessageRow = React.memo(function MessageRow({
         <div className={`max-w-[80%] ${isUser ? 'order-first' : ''}`} onClick={handleProseClick}>
           {isUser ? (
             <div
-              className="text-gray-100 rounded-lg px-3 py-2 text-sm font-sans relative group/bubble"
+              className="rounded-2xl px-4 py-2.5 text-sm relative group/bubble"
               style={{
-                background: '#3A3A3A',
-                opacity: msg.queued ? 0.7 : 1,
-                border: msg.queued ? '1px solid #3A3A3A' : 'none',
+                background: 'rgba(255,255,255,0.07)',
+                border: '1px solid rgba(255,255,255,0.09)',
+                color: '#f4f4f5',
+                opacity: msg.queued ? 0.65 : 1,
+                fontSize: 13,
+                lineHeight: 1.55,
               }}
             >
               {msg.content}
@@ -250,8 +253,8 @@ const MessageRow = React.memo(function MessageRow({
         </div>
 
         {isUser && (
-          <div className="w-7 h-7 rounded-full flex-shrink-0 bg-[#3A3A3A] flex items-center justify-center mt-1">
-            <User size={14} className="text-gray-300" />
+          <div className="w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center mt-0.5" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <User size={13} style={{ color: '#9ca3af' }} />
           </div>
         )}
         {/* Token usage badge on assistant messages */}

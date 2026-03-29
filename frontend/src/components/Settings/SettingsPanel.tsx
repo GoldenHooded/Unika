@@ -143,10 +143,10 @@ export function SettingsPanel({ onClose }: Props) {
       >
         {/* Header */}
         <div className="flex items-center px-4 py-2.5 border-b flex-shrink-0"
-             style={{ background: '#282f45', borderColor: '#3A3A3A' }}>
+             style={{ background: '#282f45', borderColor: 'rgba(255,255,255,0.07)' }}>
           <span className="text-[13px] font-semibold text-[#EEEEEE] flex-1">Ajustes</span>
           <button
-            className="p-1 rounded text-[#888] hover:text-[#EEEEEE] hover:bg-[#3C3C3C] transition-colors"
+            className="p-1 rounded text-[#888] hover:text-[#EEEEEE] hover:bg-[#28282e] transition-colors"
             onClick={onClose}
           >
             <X size={14} />
@@ -273,7 +273,7 @@ export function SettingsPanel({ onClose }: Props) {
                       <button
                         className="text-[10px] px-1.5 py-0.5 rounded border transition-colors"
                         style={cfg.enabled
-                          ? { color: '#888', borderColor: '#3A3A3A', background: 'transparent' }
+                          ? { color: '#888', borderColor: 'rgba(255,255,255,0.07)', background: 'transparent' }
                           : { color: '#444', borderColor: '#333', background: 'transparent', cursor: 'not-allowed' }
                         }
                         disabled={!cfg.enabled}

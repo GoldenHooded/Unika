@@ -66,7 +66,7 @@ function ContextBar({ data }: { data: ContextBreakdown }) {
         height: 16,
         borderRadius: 4,
         overflow: 'hidden',
-        background: '#1C1C1C',
+        background: '#141418',
         border: '1px solid #3A3A3A',
         display: 'flex',
       }}>
@@ -140,7 +140,7 @@ function SectionRow({
   const pct = total ? (tokens / total) * 100 : 0
 
   return (
-    <div style={{ borderBottom: '1px solid #2A2A2A' }}>
+    <div style={{ borderBottom: '1px solid #222228' }}>
       <div
         onClick={() => children && setOpen(v => !v)}
         style={{
@@ -168,7 +168,7 @@ function SectionRow({
         </span>
 
         {/* Mini bar */}
-        <div style={{ width: 60, height: 4, borderRadius: 2, background: '#2A2A2A', overflow: 'hidden' }}>
+        <div style={{ width: 60, height: 4, borderRadius: 2, background: '#222228', overflow: 'hidden' }}>
           <div style={{ width: `${Math.min(100, pct)}%`, height: '100%', background: color, transition: 'width 0.3s' }} />
         </div>
 
@@ -270,7 +270,7 @@ export function ContextPanel({ onClose }: { onClose: () => void }) {
       zIndex: 50,
       display: 'flex',
       flexDirection: 'column',
-      background: '#282828',
+      background: '#1e1e22',
       borderLeft: '1px solid #3A3A3A',
     }}>
       {/* Header */}
@@ -279,7 +279,7 @@ export function ContextPanel({ onClose }: { onClose: () => void }) {
         alignItems: 'center',
         padding: '0 10px',
         height: 32,
-        background: '#3C3C3C',
+        background: '#28282e',
         borderBottom: '1px solid #3A3A3A',
         flexShrink: 0,
         gap: 8,

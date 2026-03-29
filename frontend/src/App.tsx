@@ -119,7 +119,7 @@ export default function App() {
   const projectName = projects.find(p => p.id === activeProjectId)?.name ?? ''
 
   return (
-    <div className="flex h-screen w-screen bg-[#282828] text-[#D2D2D2] overflow-hidden" style={{ fontSize: 14 }}>
+    <div className="flex h-screen w-screen bg-[#1e1e22] text-[#D2D2D2] overflow-hidden" style={{ fontSize: 14 }}>
       <Sidebar onSend={send} onOpenProject={openProject} onOpenSettings={() => setSettingsOpen(true)} />
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
 
@@ -133,7 +133,7 @@ export default function App() {
         ) : focus === 'docs' ? (
           /* ── Fullscreen docs ── */
           <>
-            <div className="flex items-center h-7 bg-[#191919] border-b border-[#3A3A3A] px-3 drag-region flex-shrink-0 gap-2">
+            <div className="flex items-center h-7 bg-[#161618] border-b border-white/[0.07] px-3 drag-region flex-shrink-0 gap-2">
               <UnikaLogo size={13} />
               <span className="text-[11px] text-[#888] truncate">{projectName}</span>
               <div className="ml-auto no-drag" style={{ marginRight: 138 }}><UnityStatus /></div>
@@ -154,7 +154,7 @@ export default function App() {
           /* ── Normal layout ── */
           <>
             {/* App toolbar */}
-            <div className="flex items-center h-7 bg-[#191919] border-b border-[#3A3A3A] px-3 drag-region flex-shrink-0 gap-2">
+            <div className="flex items-center h-7 bg-[#161618] border-b border-white/[0.07] px-3 drag-region flex-shrink-0 gap-2">
               <UnikaLogo size={13} />
               <span className="text-[11px] text-[#888] truncate">{projectName}</span>
               <div className="ml-auto no-drag flex items-center gap-2" style={{ marginRight: 138 }}>
@@ -187,7 +187,7 @@ export default function App() {
 
             {/* Chat */}
             <ErrorBoundary>
-              <div className="flex flex-col min-h-0 flex-1 overflow-hidden bg-[#282828]">
+              <div className="flex flex-col min-h-0 flex-1 overflow-hidden bg-[#1e1e22]">
                 {!activeConversationId ? (
                   <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center px-8">
                     <MessageSquarePlus size={28} className="text-[#888]" />
@@ -198,8 +198,8 @@ export default function App() {
                 ) : (
                   <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
                     {/* Main chat — centered with max-width on wide screens */}
-                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', alignItems: 'center' }}>
-                      <div style={{ width: '100%', maxWidth: 860, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                      <div style={{ width: '100%', maxWidth: 860, margin: '0 auto', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                         <MessageList onSend={send} />
                         {debugEnabled && <DebugPanel />}
                         <MessageInput onSend={send} />
@@ -238,7 +238,7 @@ export default function App() {
             <ErrorBoundary>
               {!docsHidden ? (
                 <div
-                  className="flex border-t border-[#3A3A3A] flex-shrink-0 overflow-hidden bg-[#282828]"
+                  className="flex border-t border-white/[0.07] flex-shrink-0 overflow-hidden bg-[#1e1e22]"
                   style={{ height: bottomH }}
                 >
                   <div className="flex flex-col overflow-hidden flex-1">
@@ -254,9 +254,9 @@ export default function App() {
                   </div>
                 </div>
               ) : (
-                <div className="flex-shrink-0 border-t border-[#3A3A3A]">
+                <div className="flex-shrink-0 border-t border-white/[0.07]">
                   <button
-                    className="w-full h-5 flex items-center justify-center gap-2 text-[#888] hover:text-[#C4C4C4] hover:bg-[#3C3C3C] transition-colors"
+                    className="w-full h-5 flex items-center justify-center gap-2 text-[#888] hover:text-[#C4C4C4] hover:bg-[#28282e] transition-colors"
                     title="Mostrar Documentos"
                     onClick={() => setDocsHidden(false)}
                   >
@@ -282,7 +282,7 @@ function PanelHeader({
   isMaximized: boolean
 }) {
   return (
-    <div className="flex items-center px-2 py-[3px] bg-[#3C3C3C] border-b border-[#3A3A3A] flex-shrink-0 gap-1 select-none" style={{ minHeight: 22 }}>
+    <div className="flex items-center px-2 py-[3px] bg-[#28282e] border-b border-white/[0.07] flex-shrink-0 gap-1 select-none" style={{ minHeight: 22 }}>
       <span className="text-[11px] text-[#C4C4C4] font-medium flex-1 leading-none">{label}</span>
       <button
         className="p-0.5 text-[#888] hover:text-[#EEEEEE] hover:bg-[#585858] rounded transition-colors"
@@ -313,7 +313,7 @@ function NoProjectScreen({
   onSelectProject: (p: any) => void
 }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center gap-5 drag-region bg-[#282828]">
+    <div className="flex-1 flex flex-col items-center justify-center gap-5 drag-region bg-[#1e1e22]">
       <div className="flex flex-col items-center gap-3 no-drag">
         <UnikaLogo size={56} />
         <h1 className="text-lg font-semibold text-[#D2D2D2] tracking-tight">Unika</h1>
@@ -334,7 +334,7 @@ function NoProjectScreen({
           {projects.map(p => (
             <button
               key={p.id}
-              className="w-full flex items-center gap-2 px-3 py-1.5 bg-[#2A2A2A] hover:bg-[#3C3C3C] border border-[#3A3A3A] rounded text-left transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-1.5 bg-[#2A2A2A] hover:bg-[#28282e] border border-white/[0.07] rounded text-left transition-colors"
               onClick={() => onSelectProject(p)}
             >
               <FolderOpen size={13} className="text-[#888] flex-shrink-0" />
