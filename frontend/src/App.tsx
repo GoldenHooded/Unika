@@ -11,13 +11,14 @@ import { UnityStatus } from './components/UnityStatus/UnityStatus'
 import { DocEditor } from './components/DocEditor/DocEditor'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { SettingsPanel } from './components/Settings/SettingsPanel'
+import { ContextPanel } from './components/Chat/ContextPanel'
 import { useProjectStore } from './stores/projectStore'
 import { useReviewStore } from './stores/reviewStore'
 import { useDebugStore } from './stores/debugStore'
 import { playExitSound } from './utils/sounds'
 import {
   FolderOpen, MessageSquarePlus,
-  Maximize2, Minimize2, X, Clock,
+  Maximize2, Minimize2, X, Clock, Layers,
 } from 'lucide-react'
 import { UnikaLogo } from './components/UnikaLogo'
 
@@ -83,6 +84,7 @@ export default function App() {
   const [docsHidden, setDocsHidden] = useState(false)
   const [focus, setFocus] = useState<Focus>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [contextOpen, setContextOpen] = useState(false)
 
   // Play exit sound when Electron signals the app is closing
   useEffect(() => {
@@ -158,7 +160,18 @@ export default function App() {
               <div className="ml-auto no-drag flex items-center gap-2" style={{ marginRight: 138 }}>
                 <UsageMeter />
                 <button
-                  onClick={() => setTimelineOpen((v) => !v)}
+                  onClick={() => { setContextOpen(v => !v); setTimelineOpen(false) }}
+                  className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+                  style={contextOpen
+                    ? { background: 'rgba(61,133,200,0.15)', color: '#3d85c8', borderColor: 'rgba(61,133,200,0.3)' }
+                    : { background: 'rgba(255,255,255,0.04)', color: '#555', borderColor: 'rgba(255,255,255,0.06)' }
+                  }
+                  title="Ver contexto del agente"
+                >
+                  <Layers size={8} />
+                </button>
+                <button
+                  onClick={() => { setTimelineOpen((v) => !v); setContextOpen(false) }}
                   className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded border transition-colors"
                   style={timelineOpen
                     ? { background: 'rgba(61,133,200,0.15)', color: '#3d85c8', borderColor: 'rgba(61,133,200,0.3)' }
@@ -184,23 +197,28 @@ export default function App() {
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                    {/* Main chat */}
-                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                      <MessageList onSend={send} />
-                      {debugEnabled && <DebugPanel />}
-                      <MessageInput onSend={send} />
+                    {/* Main chat — centered with max-width on wide screens */}
+                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', alignItems: 'center' }}>
+                      <div style={{ width: '100%', maxWidth: 860, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                        <MessageList onSend={send} />
+                        {debugEnabled && <DebugPanel />}
+                        <MessageInput onSend={send} />
+                      </div>
                     </div>
-                    {/* Right panel — Review (auto) or Timeline (manual) */}
+                    {/* Right panel — Review (auto), Timeline or Context (manual) */}
                     <div style={{
-                      width: (reviewActive || timelineOpen) ? '43%' : '0',
+                      width: (reviewActive || timelineOpen || contextOpen) ? '43%' : '0',
                       flexShrink: 0,
                       transition: 'width 0.4s cubic-bezier(0.4,0,0.2,1)',
                       overflow: 'hidden',
+                      position: 'relative',
                     }}>
                       {reviewActive ? (
                         <ReviewPanel />
                       ) : timelineOpen ? (
                         <TimelinePanel />
+                      ) : contextOpen ? (
+                        <ContextPanel onClose={() => setContextOpen(false)} />
                       ) : null}
                     </div>
                   </div>

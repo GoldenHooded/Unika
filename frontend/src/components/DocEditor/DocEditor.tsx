@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { renderMarkdown, extractGuiElements } from '../../lib/markdown'
 import { MermaidBlock } from '../Chat/MermaidBlock'
 import { DocOutline } from './DocOutline'
 import { useProjectStore } from '../../stores/projectStore'
+import { useChatStore } from '../../stores/chatStore'
 import { Code2, Eye, Save, SplitSquareHorizontal } from 'lucide-react'
 import { KanbanBoard } from '../Kanban/KanbanBoard'
 
@@ -10,6 +11,8 @@ type DocName = 'GDD' | 'TDD' | 'GAME_CONTEXT' | 'MEMORY' | 'SESSION_LOG' | 'BOAR
 
 export function DocEditor({ onSend: _onSend }: { onSend?: (data: object) => void }) {
   const activeProjectId = useProjectStore(s => s.activeProjectId)
+  const streaming = useChatStore(s => s.streaming)
+  const prevStreamingRef = useRef(false)
   const [activeDoc, setActiveDoc] = useState<DocName>('GDD')
   const [content, setContent] = useState('')
   const [mode, setMode] = useState<'split' | 'edit' | 'preview'>('split')
@@ -25,11 +28,24 @@ export function DocEditor({ onSend: _onSend }: { onSend?: (data: object) => void
       .catch(() => setContent(''))
   }, [activeProjectId, activeDoc])
 
+  // Re-fetch after the agent finishes (catches FILE_WRITE + DOC_UPDATE cases)
+  useEffect(() => {
+    if (prevStreamingRef.current && !streaming && activeProjectId) {
+      fetch(`http://127.0.0.1:8765/projects/${activeProjectId}/docs/${activeDoc}`)
+        .then(r => r.json())
+        .then(data => setContent(data.content ?? ''))
+        .catch(() => {})
+    }
+    prevStreamingRef.current = streaming
+  }, [streaming, activeProjectId, activeDoc])
+
+  // Immediate update while the agent is still running (real-time)
   useEffect(() => {
     const handler = (e: CustomEvent) => {
-      const { document, content: newContent } = e.detail
+      const { document, content: newContent } = e.detail ?? {}
+      if (!document) return
       const docName = document.replace('.md', '').toUpperCase() as DocName
-      if (docName === activeDoc) setContent(newContent)
+      if (docName === activeDoc) setContent(newContent ?? '')
     }
     window.addEventListener('doc_updated', handler as EventListener)
     return () => window.removeEventListener('doc_updated', handler as EventListener)

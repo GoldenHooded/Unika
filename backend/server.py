@@ -247,6 +247,94 @@ def save_doc(project_id: str, doc_name: str, body: dict):
     return {"ok": True}
 
 
+@app.get("/projects/{project_id}/channels/{channel_id}/context-breakdown")
+def get_context_breakdown(project_id: str, channel_id: str):
+    """Return a token-level breakdown of everything that goes into the agent context."""
+    import json as _json
+    from backend.projects import conversations as conv_mgr
+    from backend.agent.prompts import get_system_prompt_base
+
+    ctx_dir = project_mgr.get_context_dir(project_id)
+    history = conv_mgr.load_history(project_id, channel_id)
+
+    def est_tokens(text: str) -> int:
+        return max(1, len(text) // 4)
+
+    # ── System prompt base (strip dynamic placeholder) ────────────────────────
+    sys_base = get_system_prompt_base()
+    sys_base = sys_base.replace("\n{context_section}", "").replace("{context_section}", "")
+
+    # ── Context files injected into the prompt ────────────────────────────────
+    CONTEXT_FILES = [
+        ("GAME_CONTEXT.md", "Contexto",     3000),
+        ("TDD.md",          "TDD",          3000),
+        ("GDD.md",          "GDD",          3000),
+        ("MEMORY.md",       "Memoria",      2000),
+        ("SESSION_LOG.md",  "Log de sesión", 1500),
+    ]
+    context_sections = []
+    for filename, label, limit in CONTEXT_FILES:
+        path = ctx_dir / filename
+        if path.exists():
+            raw = path.read_text(encoding="utf-8")
+            used = raw[:limit]
+            context_sections.append({
+                "id": filename.replace(".md", "").lower(),
+                "label": label,
+                "chars": len(used),
+                "chars_total": len(raw),
+                "tokens": est_tokens(used),
+                "truncated": len(raw) > limit,
+            })
+        else:
+            context_sections.append({
+                "id": filename.replace(".md", "").lower(),
+                "label": label,
+                "chars": 0,
+                "chars_total": 0,
+                "tokens": 0,
+                "truncated": False,
+            })
+
+    # ── Conversation history ──────────────────────────────────────────────────
+    history_items = []
+    for msg in history:
+        role = msg.get("role", "")
+        content = msg.get("content", "") or ""
+        if isinstance(content, list):
+            content = " ".join(str(c) for c in content)
+        msg_json = _json.dumps(msg, ensure_ascii=False)
+        preview = str(content)[:120].replace("\n", " ").strip()
+        history_items.append({
+            "role": role,
+            "preview": preview,
+            "chars": len(msg_json),
+            "tokens": est_tokens(msg_json),
+            "has_tools": bool(msg.get("tool_calls")),
+        })
+
+    sp_tokens      = est_tokens(sys_base)
+    context_tokens = sum(s["tokens"] for s in context_sections)
+    history_tokens = sum(i["tokens"] for i in history_items)
+    total_tokens   = sp_tokens + context_tokens + history_tokens
+
+    return {
+        "total_tokens":    total_tokens,
+        "context_window":  65536,
+        "system_prompt": {
+            "label":  "System Prompt",
+            "chars":  len(sys_base),
+            "tokens": sp_tokens,
+        },
+        "context_files": context_sections,
+        "history": {
+            "label":  "Historial",
+            "tokens": history_tokens,
+            "items":  history_items,
+        },
+    }
+
+
 @app.get("/projects/{project_id}/board")
 def get_board(project_id: str):
     context_dir = project_mgr.get_context_dir(project_id)
