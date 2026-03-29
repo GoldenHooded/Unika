@@ -68,7 +68,7 @@ export function MessageList({ onSend }: { onSend: (data: object) => void }) {
   }, [messages])
 
   return (
-    <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4 scrollbar-thin">
+    <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-5 space-y-4 scrollbar-thin">
       {messages.map((msg) => (
         <ErrorBoundary key={msg.id}>
           <MessageRow msg={msg} onSend={onSend} />
@@ -148,7 +148,7 @@ const MessageRow = React.memo(function MessageRow({
           </div>
         )}
 
-        <div className={`max-w-[80%] ${isUser ? 'order-first' : ''}`} onClick={handleProseClick}>
+        <div className={`max-w-[80%] min-w-0 ${isUser ? 'order-first' : ''}`} onClick={handleProseClick}>
           {isUser ? (
             <div
               className="rounded-2xl px-4 py-2.5 text-sm relative group/bubble"
