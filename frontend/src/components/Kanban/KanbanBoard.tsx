@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { Plus, X, Edit2, Check, Tag, GripVertical, Trash2 } from 'lucide-react'
+import { Plus, X, Edit2, Check, Tag, GripVertical, Trash2, Maximize2, Minimize2 } from 'lucide-react'
 import { useProjectStore } from '../../stores/projectStore'
 
 const API = 'http://127.0.0.1:8765'
@@ -34,7 +34,6 @@ function tagStyle(tag: string) {
   return TAG_COLORS[tag.toLowerCase()] ?? { bg: '#2a2a2a', text: '#888' }
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
 function uid() { return Math.random().toString(36).slice(2, 10) }
 
 // ── Card component ─────────────────────────────────────────────────────────────
@@ -57,6 +56,7 @@ function Card({
 
   return (
     <div
+      data-kanban-card
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
@@ -142,7 +142,7 @@ function CardModal({
 
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.7)',
+      position: 'fixed', inset: 0, zIndex: 600, background: 'rgba(0,0,0,0.7)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div style={{
@@ -167,7 +167,6 @@ function CardModal({
           rows={2}
           style={{ ...inputStyle, resize: 'none', marginBottom: 10 }}
         />
-        {/* Tags */}
         <div style={{ fontSize: 9, color: '#555', marginBottom: 5 }}>TAGS</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
           {KNOWN_TAGS.map(t => {
@@ -197,7 +196,6 @@ function CardModal({
             />
           </div>
         </div>
-        {/* Color */}
         <div style={{ fontSize: 9, color: '#555', marginBottom: 5 }}>COLOR DE ACENTO</div>
         <div style={{ display: 'flex', gap: 5, marginBottom: 14 }}>
           {CARD_COLORS.map(c => (
@@ -209,7 +207,6 @@ function CardModal({
             }} />
           ))}
         </div>
-        {/* Actions */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
           <button onClick={onClose} style={cancelBtn}>Cancelar</button>
           <button onClick={save} disabled={!title.trim()} style={saveBtn}>Guardar</button>
@@ -256,6 +253,7 @@ function Column({
 
   return (
     <div
+      data-kanban-col
       style={{
         width: 240, flexShrink: 0,
         background: '#1e1f22', border: '1px solid #2a2a2a', borderRadius: 6,
@@ -313,7 +311,6 @@ function Column({
             />
           </div>
         ))}
-        {/* Drop zone at end */}
         {draggingCard && draggingCard.fromColId !== col.id && (
           <div style={{
             height: dragOverIdx === col.cards.length ? 32 : 6,
@@ -355,10 +352,15 @@ function Column({
 // ── Main board ─────────────────────────────────────────────────────────────────
 export function KanbanBoard() {
   const activeProjectId = useProjectStore(s => s.activeProjectId)
-  const [board, setBoard] = useState<KanbanBoardData>({ columns: [] })
-  const [loading, setLoading] = useState(true)
+  const [board, setBoard]           = useState<KanbanBoardData>({ columns: [] })
+  const [loading, setLoading]       = useState(true)
   const [draggingCard, setDraggingCard] = useState<{ cardId: string; fromColId: string } | null>(null)
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [fullscreen, setFullscreen] = useState(false)
+  const [panning, setPanning]       = useState(false)
+  const [overBg, setOverBg]         = useState(false)
+  const saveTimer   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const boardRef    = useRef<HTMLDivElement>(null)
+  const panStart    = useRef<{ x: number; scrollLeft: number } | null>(null)
 
   // Load
   useEffect(() => {
@@ -370,7 +372,7 @@ export function KanbanBoard() {
       .catch(() => setLoading(false))
   }, [activeProjectId])
 
-  // Auto-save (debounced 600ms)
+  // Auto-save
   const persist = useCallback((b: KanbanBoardData) => {
     if (!activeProjectId) return
     if (saveTimer.current) clearTimeout(saveTimer.current)
@@ -388,17 +390,12 @@ export function KanbanBoard() {
     persist(b)
   }, [persist])
 
-  const updateCol = (col: KanbanColumn) => {
-    const next = { columns: board.columns.map(c => c.id === col.id ? col : c) }
-    updateBoard(next)
-  }
-  const deleteCol = (id: string) => {
+  const updateCol = (col: KanbanColumn) =>
+    updateBoard({ columns: board.columns.map(c => c.id === col.id ? col : c) })
+  const deleteCol = (id: string) =>
     updateBoard({ columns: board.columns.filter(c => c.id !== id) })
-  }
-  const addCol = () => {
-    const next: KanbanColumn = { id: uid(), title: 'Nueva columna', cards: [] }
-    updateBoard({ columns: [...board.columns, next] })
-  }
+  const addCol = () =>
+    updateBoard({ columns: [...board.columns, { id: uid(), title: 'Nueva columna', cards: [] }] })
 
   const dropCard = (toColId: string, afterCardId: string | null) => {
     if (!draggingCard) return
@@ -425,6 +422,37 @@ export function KanbanBoard() {
     setDraggingCard(null)
   }
 
+  // ── Pan handlers ────────────────────────────────────────────────────────────
+  const onBoardMouseDown = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    if (target.closest('[data-kanban-col]') || target.closest('[data-kanban-card]')) return
+    panStart.current = { x: e.clientX, scrollLeft: boardRef.current?.scrollLeft ?? 0 }
+    setPanning(true)
+    e.preventDefault()
+  }
+  const onBoardMouseMove = (e: React.MouseEvent) => {
+    // Update background-hover cursor
+    const target = e.target as HTMLElement
+    const isOnBg = !target.closest('[data-kanban-col]') && !target.closest('[data-kanban-card]')
+    setOverBg(isOnBg)
+    // Pan scroll
+    if (!panStart.current || !boardRef.current) return
+    const dx = panStart.current.x - e.clientX
+    boardRef.current.scrollLeft = panStart.current.scrollLeft + dx
+  }
+  const onBoardMouseUp = () => {
+    panStart.current = null
+    setPanning(false)
+  }
+
+  // ── ESC exits fullscreen ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!fullscreen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setFullscreen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [fullscreen])
+
   if (!activeProjectId) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#555', fontSize: 11 }}>
       Selecciona un proyecto
@@ -436,32 +464,55 @@ export function KanbanBoard() {
     </div>
   )
 
-  return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#282828' }}>
-      {/* Board toolbar */}
+  const boardContent = (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#1a1a1e' }}>
+      {/* Toolbar */}
       <div style={{
         display: 'flex', alignItems: 'center', padding: '6px 12px',
-        borderBottom: '1px solid #3A3A3A', flexShrink: 0, gap: 8,
+        borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0, gap: 8,
+        background: '#28282e',
       }}>
-        <span style={{ fontSize: 10, color: '#555', fontWeight: 600 }}>TABLERO</span>
+        <span style={{ fontSize: 10, color: '#555', fontWeight: 600, letterSpacing: '0.08em' }}>TABLERO</span>
         <button
           onClick={addCol}
           style={{
             display: 'flex', alignItems: 'center', gap: 4,
-            background: 'rgba(255,255,255,0.04)', border: '1px solid #3A3A3A',
+            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
             borderRadius: 4, padding: '3px 8px', cursor: 'pointer',
             color: '#888', fontSize: 9,
           }}
         >
           <Plus size={9} /> Columna
         </button>
+        <div style={{ marginLeft: 'auto' }}>
+          <button
+            onClick={() => setFullscreen(v => !v)}
+            title={fullscreen ? 'Salir de pantalla completa (ESC)' : 'Pantalla completa'}
+            style={{
+              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 4, padding: '3px 6px', cursor: 'pointer', color: '#666',
+              display: 'flex', alignItems: 'center',
+            }}
+          >
+            {fullscreen ? <Minimize2 size={11} /> : <Maximize2 size={11} />}
+          </button>
+        </div>
       </div>
 
-      {/* Columns */}
-      <div style={{
-        flex: 1, display: 'flex', gap: 10, padding: 12,
-        overflowX: 'auto', overflowY: 'hidden', alignItems: 'flex-start',
-      }}>
+      {/* Columns — pannable area */}
+      <div
+        ref={boardRef}
+        style={{
+          flex: 1, display: 'flex', gap: 10, padding: 12,
+          overflowX: 'auto', overflowY: 'hidden', alignItems: 'flex-start',
+          cursor: panning ? 'grabbing' : overBg ? 'grab' : 'default',
+          userSelect: panning ? 'none' : 'auto',
+        }}
+        onMouseDown={onBoardMouseDown}
+        onMouseMove={onBoardMouseMove}
+        onMouseUp={onBoardMouseUp}
+        onMouseLeave={() => { onBoardMouseUp(); setOverBg(false) }}
+      >
         {board.columns.map(col => (
           <Column
             key={col.id}
@@ -477,10 +528,13 @@ export function KanbanBoard() {
         {board.columns.length === 0 && (
           <div style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            flex: 1, color: '#444', fontSize: 11, gap: 8,
+            flex: 1, color: '#444', fontSize: 11, gap: 8, pointerEvents: 'none',
           }}>
             <span>El tablero está vacío</span>
-            <button onClick={addCol} style={saveBtn}>
+            <button
+              onClick={addCol}
+              style={{ ...saveBtn, pointerEvents: 'auto' }}
+            >
               <Plus size={10} style={{ marginRight: 4 }} /> Crear primera columna
             </button>
           </div>
@@ -488,6 +542,19 @@ export function KanbanBoard() {
       </div>
     </div>
   )
+
+  if (fullscreen) {
+    return (
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 300,
+        background: '#1a1a1e',
+      }}>
+        {boardContent}
+      </div>
+    )
+  }
+
+  return boardContent
 }
 
 // ── Shared micro-styles ────────────────────────────────────────────────────────

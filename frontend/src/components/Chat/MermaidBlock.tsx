@@ -2,9 +2,6 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { Maximize2, Download, X } from 'lucide-react'
 
 // ── Module-level singleton init ───────────────────────────────────────────────
-// mermaid.initialize() must be called ONCE per app lifetime.
-// Calling it inside a per-component useEffect (even once per instance)
-// resets internal state in mermaid v10+ and causes "Syntax error in text".
 let _mermaidReady: Promise<typeof import('mermaid').default> | null = null
 
 function getMermaid() {
@@ -35,17 +32,17 @@ function getMermaid() {
   return _mermaidReady
 }
 
-// ── Unique render-id counter ──────────────────────────────────────────────────
 let _mid = 0
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 interface Transform { x: number; y: number; scale: number }
 
 // ── Zoom/pan modal ────────────────────────────────────────────────────────────
 function ZoomModal({ svgHtml, onClose }: { svgHtml: string; onClose: () => void }) {
   const [tf, setTf] = useState<Transform>({ x: 0, y: 0, scale: 1 })
+  const [cursor, setCursor] = useState<'grab' | 'grabbing'>('grab')
   const dragging = useRef(false)
   const last = useRef({ x: 0, y: 0 })
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -53,14 +50,32 @@ function ZoomModal({ svgHtml, onClose }: { svgHtml: string; onClose: () => void 
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  const onWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault()
-    const factor = e.deltaY < 0 ? 1.12 : 0.88
-    setTf(t => ({ ...t, scale: Math.min(Math.max(t.scale * factor, 0.1), 20) }))
+  // Non-passive wheel listener so we can preventDefault
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const handler = (e: WheelEvent) => {
+      e.preventDefault()
+      const factor = e.deltaY < 0 ? 1.12 : 0.88
+      const rect = el.getBoundingClientRect()
+      // Mouse position relative to container center
+      const cx = e.clientX - rect.left - rect.width / 2
+      const cy = e.clientY - rect.top - rect.height / 2
+      setTf(t => ({
+        // Shift origin so the point under cursor stays fixed
+        x: t.x + cx * (1 - factor),
+        y: t.y + cy * (1 - factor),
+        scale: Math.min(Math.max(t.scale * factor, 0.1), 20),
+      }))
+    }
+    el.addEventListener('wheel', handler, { passive: false })
+    return () => el.removeEventListener('wheel', handler)
   }, [])
+
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     dragging.current = true
     last.current = { x: e.clientX, y: e.clientY }
+    setCursor('grabbing')
   }, [])
   const onMouseMove = useCallback((e: React.MouseEvent) => {
     if (!dragging.current) return
@@ -69,7 +84,7 @@ function ZoomModal({ svgHtml, onClose }: { svgHtml: string; onClose: () => void 
     last.current = { x: e.clientX, y: e.clientY }
     setTf(t => ({ ...t, x: t.x + dx, y: t.y + dy }))
   }, [])
-  const onMouseUp = useCallback(() => { dragging.current = false }, [])
+  const onMouseUp = useCallback(() => { dragging.current = false; setCursor('grab') }, [])
 
   return (
     <div
@@ -78,7 +93,6 @@ function ZoomModal({ svgHtml, onClose }: { svgHtml: string; onClose: () => void 
         background: 'rgba(0,0,0,0.88)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <button
         onClick={onClose}
@@ -86,17 +100,17 @@ function ZoomModal({ svgHtml, onClose }: { svgHtml: string; onClose: () => void 
           position: 'absolute', top: 16, right: 16,
           background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
           borderRadius: 6, padding: '6px 10px', cursor: 'pointer', color: '#aaa',
-          display: 'flex', alignItems: 'center', gap: 4, fontSize: 11,
+          display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, zIndex: 10,
         }}
       >
         <X size={12} /> Cerrar (ESC)
       </button>
       <div style={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', fontSize: 10, color: '#444', pointerEvents: 'none' }}>
-        Rueda para zoom · Arrastrar para desplazar
+        Rueda para zoom hacia el cursor · Arrastrar para desplazar
       </div>
       <div
-        style={{ width: '100%', height: '100%', overflow: 'hidden', cursor: dragging.current ? 'grabbing' : 'grab' }}
-        onWheel={onWheel}
+        ref={containerRef}
+        style={{ width: '100%', height: '100%', overflow: 'hidden', cursor }}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
@@ -107,7 +121,6 @@ function ZoomModal({ svgHtml, onClose }: { svgHtml: string; onClose: () => void 
             position: 'absolute', top: '50%', left: '50%',
             transform: `translate(calc(-50% + ${tf.x}px), calc(-50% + ${tf.y}px)) scale(${tf.scale})`,
             transformOrigin: 'center center',
-            transition: dragging.current ? 'none' : 'transform 0.05s',
           }}
           dangerouslySetInnerHTML={{ __html: svgHtml }}
         />
@@ -122,6 +135,8 @@ export function MermaidBlock({ code }: { code: string }) {
   const [error, setError]       = useState<string | null>(null)
   const [svgHtml, setSvgHtml]   = useState<string>('')
   const [expanded, setExpanded] = useState(false)
+  // Hover state for toolbar — more reliable than Tailwind group-hover
+  const [hovered, setHovered]   = useState(false)
   const id = useRef(`mmd-${++_mid}`)
 
   useEffect(() => {
@@ -188,21 +203,23 @@ export function MermaidBlock({ code }: { code: string }) {
       {expanded && svgHtml && (
         <ZoomModal svgHtml={svgHtml} onClose={() => setExpanded(false)} />
       )}
-      <div style={{
-        margin: '10px 0', borderRadius: 8, overflow: 'hidden',
-        border: '1px solid rgba(255,255,255,0.07)',
-        background: '#141418',
-      }}
-        className="group/mermaid"
+      <div
+        style={{
+          margin: '10px 0', borderRadius: 8, overflow: 'hidden',
+          border: '1px solid rgba(255,255,255,0.07)',
+          background: '#141418',
+        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
-        {/* Toolbar — visible on hover */}
+        {/* Toolbar — fades in on hover */}
         <div style={{
           display: 'flex', justifyContent: 'flex-end', gap: 4,
           padding: '4px 8px', borderBottom: '1px solid rgba(255,255,255,0.05)',
-          opacity: 0, transition: 'opacity 0.15s',
-        }}
-          className="group-hover/mermaid:!opacity-100"
-        >
+          opacity: hovered ? 1 : 0,
+          transition: 'opacity 0.15s',
+          pointerEvents: hovered ? 'auto' : 'none',
+        }}>
           {[
             { label: 'PNG', icon: <Download size={9} />, action: exportPng },
             { label: 'Ampliar', icon: <Maximize2 size={9} />, action: () => setExpanded(true) },
