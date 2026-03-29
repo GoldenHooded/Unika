@@ -163,36 +163,36 @@ export default function App() {
                 <UsageMeter />
                 <button
                   onClick={() => { setContextOpen(v => !v); setTimelineOpen(false); setBoardOpen(false) }}
-                  className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 rounded border transition-colors"
                   style={contextOpen
                     ? { background: 'rgba(61,133,200,0.15)', color: '#3d85c8', borderColor: 'rgba(61,133,200,0.3)' }
-                    : { background: 'rgba(255,255,255,0.04)', color: '#555', borderColor: 'rgba(255,255,255,0.06)' }
+                    : { background: 'rgba(255,255,255,0.04)', color: '#666', borderColor: 'rgba(255,255,255,0.08)' }
                   }
                   title="Ver contexto del agente"
                 >
-                  <Layers size={8} />
+                  <Layers size={13} />
                 </button>
                 <button
                   onClick={() => { setTimelineOpen(v => !v); setContextOpen(false); setBoardOpen(false) }}
-                  className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 rounded border transition-colors"
                   style={timelineOpen
                     ? { background: 'rgba(61,133,200,0.15)', color: '#3d85c8', borderColor: 'rgba(61,133,200,0.3)' }
-                    : { background: 'rgba(255,255,255,0.04)', color: '#555', borderColor: 'rgba(255,255,255,0.06)' }
+                    : { background: 'rgba(255,255,255,0.04)', color: '#666', borderColor: 'rgba(255,255,255,0.08)' }
                   }
                   title="Timeline de sesión"
                 >
-                  <Clock size={8} />
+                  <Clock size={13} />
                 </button>
                 <button
                   onClick={() => { setBoardOpen(v => !v); setContextOpen(false); setTimelineOpen(false) }}
-                  className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 rounded border transition-colors"
                   style={boardOpen
                     ? { background: 'rgba(107,203,119,0.15)', color: '#6BCB77', borderColor: 'rgba(107,203,119,0.3)' }
-                    : { background: 'rgba(255,255,255,0.04)', color: '#555', borderColor: 'rgba(255,255,255,0.06)' }
+                    : { background: 'rgba(255,255,255,0.04)', color: '#666', borderColor: 'rgba(255,255,255,0.08)' }
                   }
                   title="Tablero Kanban"
                 >
-                  <LayoutGrid size={8} />
+                  <LayoutGrid size={13} />
                 </button>
                 <UnityStatus />
               </div>

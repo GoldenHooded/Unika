@@ -1,6 +1,6 @@
 import React from 'react'
 import { useChatStore, ChatMessage } from '../../stores/chatStore'
-import { Zap, Brain, Clock, ChevronRight } from 'lucide-react'
+import { Zap, Brain, Clock } from 'lucide-react'
 
 function formatTime(ts?: number): string {
   if (!ts) return ''
@@ -33,7 +33,7 @@ function toolColor(name: string): string {
 function AssistantRow({ msg }: { msg: ChatMessage }) {
   const tools = msg.commands ?? []
   const uniqueTools = [...new Set(tools.map((c) => c.name))]
-  const isR1 = msg.content?.includes('[R1]') // heuristic fallback
+  const isR1 = msg.content?.includes('[R1]')
   const tokens = formatTokens(msg.tokenUsage)
 
   return (
@@ -41,18 +41,18 @@ function AssistantRow({ msg }: { msg: ChatMessage }) {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 3,
-        padding: '6px 10px',
-        borderBottom: '1px solid #141414',
+        gap: 5,
+        padding: '10px 14px',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
       }}
     >
       {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div
           style={{
-            width: 14,
-            height: 14,
-            borderRadius: 3,
+            width: 20,
+            height: 20,
+            borderRadius: 4,
             background: '#1a1f2e',
             border: '1px solid #2d3a52',
             display: 'flex',
@@ -62,17 +62,17 @@ function AssistantRow({ msg }: { msg: ChatMessage }) {
           }}
         >
           {isR1
-            ? <Brain size={8} color="#c084fc" />
-            : <Zap size={8} color="#3d85c8" />}
+            ? <Brain size={11} color="#c084fc" />
+            : <Zap size={11} color="#3d85c8" />}
         </div>
 
-        <span style={{ fontSize: 9, color: '#666', display: 'flex', alignItems: 'center', gap: 3 }}>
-          <Clock size={7} color="#444" />
+        <span style={{ fontSize: 12, color: '#888', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <Clock size={10} color="#555" />
           {formatTime(msg.ts)}
         </span>
 
         {tokens && (
-          <span style={{ marginLeft: 'auto', fontSize: 8, color: '#444', fontFamily: "'Cascadia Code', 'Cascadia Mono', Consolas, monospace" }}>
+          <span style={{ marginLeft: 'auto', fontSize: 11, color: '#555', fontFamily: 'var(--font-mono)' }}>
             {tokens}
           </span>
         )}
@@ -83,12 +83,13 @@ function AssistantRow({ msg }: { msg: ChatMessage }) {
         <p
           style={{
             margin: 0,
-            fontSize: 9,
-            color: '#666',
+            fontSize: 12,
+            color: '#aaa',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            paddingLeft: 20,
+            paddingLeft: 28,
+            lineHeight: '1.4',
           }}
         >
           {msg.content.replace(/```[\s\S]*?```/g, '[code]').slice(0, 120)}
@@ -97,19 +98,19 @@ function AssistantRow({ msg }: { msg: ChatMessage }) {
 
       {/* Tool chips */}
       {uniqueTools.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, paddingLeft: 20 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, paddingLeft: 28 }}>
           {uniqueTools.map((name) => (
             <span
               key={name}
               style={{
-                fontSize: 8,
-                padding: '1px 5px',
-                borderRadius: 3,
+                fontSize: 11,
+                padding: '2px 7px',
+                borderRadius: 4,
                 background: `${toolColor(name)}22`,
                 color: toolColor(name),
                 border: `1px solid ${toolColor(name)}44`,
-                fontFamily: "'Cascadia Code', 'Cascadia Mono', Consolas, monospace",
-                letterSpacing: '0.03em',
+                fontFamily: 'var(--font-mono)',
+                letterSpacing: '0.02em',
               }}
             >
               {name}
@@ -143,17 +144,17 @@ export function TimelinePanel() {
           flexShrink: 0,
           display: 'flex',
           alignItems: 'center',
-          gap: 6,
-          padding: '5px 10px',
-          borderBottom: '1px solid #1A1A1A',
+          gap: 8,
+          padding: '7px 14px',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
           background: '#0A0B0D',
         }}
       >
-        <Clock size={10} color="#3d85c8" />
-        <span style={{ fontSize: 9, fontFamily: "'Cascadia Code', 'Cascadia Mono', Consolas, monospace", color: '#3d85c8', letterSpacing: '0.12em' }}>
+        <Clock size={13} color="#3d85c8" />
+        <span style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: '#3d85c8', letterSpacing: '0.08em' }}>
           › timeline
         </span>
-        <span style={{ marginLeft: 'auto', fontSize: 8, color: '#444' }}>
+        <span style={{ marginLeft: 'auto', fontSize: 11, color: '#555' }}>
           {assistantMsgs.length} turnos
         </span>
       </div>
@@ -161,7 +162,7 @@ export function TimelinePanel() {
       {/* Scrollable list */}
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         {assistantMsgs.length === 0 ? (
-          <div style={{ padding: 16, textAlign: 'center', color: '#444', fontSize: 9 }}>
+          <div style={{ padding: 20, textAlign: 'center', color: '#555', fontSize: 12 }}>
             Sin actividad todavía
           </div>
         ) : (
