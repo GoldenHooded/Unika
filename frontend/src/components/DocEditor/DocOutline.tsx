@@ -44,10 +44,18 @@ export function DocOutline({
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current) }, [])
 
-  const scrollTo = (id: string) => {
-    if (!previewRef.current) return
-    const el = previewRef.current.querySelector(`#${id}`)
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  // Find heading by DOM index — reliable regardless of ID formatting
+  const scrollTo = (index: number) => {
+    const container = previewRef.current
+    if (!container) return
+    const headingEls = container.querySelectorAll('h1, h2, h3')
+    const el = headingEls[index] as HTMLElement | undefined
+    if (!el) return
+    // Manually compute offset to scroll the container (not the page)
+    const containerTop = container.getBoundingClientRect().top
+    const elTop = el.getBoundingClientRect().top
+    const offset = elTop - containerTop + container.scrollTop - 8
+    container.scrollTo({ top: offset, behavior: 'smooth' })
   }
 
   if (headings.length === 0) return null
@@ -92,7 +100,7 @@ export function DocOutline({
           {headings.map((h, i) => (
             <button
               key={i}
-              onClick={() => scrollTo(h.id)}
+              onClick={() => scrollTo(i)}
               style={{
                 display: 'block',
                 width: '100%',

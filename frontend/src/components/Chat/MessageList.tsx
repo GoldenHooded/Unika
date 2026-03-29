@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { useChatStore, ChatMessage } from '../../stores/chatStore'
 import { renderMarkdown, extractGuiElements } from '../../lib/markdown'
 
@@ -61,25 +61,89 @@ function useBlurChunks(
 export function MessageList({ onSend }: { onSend: (data: object) => void }) {
   const messages   = useChatStore(s => s.messages)
   const askPending = useChatStore(s => s.askPending)
-  const bottomRef  = useRef<HTMLDivElement>(null)
+  const bottomRef    = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [atBottom, setAtBottom] = useState(true)
 
+  // Track whether the user is near the bottom
+  const handleScroll = useCallback(() => {
+    const el = containerRef.current
+    if (!el) return
+    const threshold = 80
+    setAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < threshold)
+  }, [])
+
+  // Auto-scroll only when already at bottom
   useEffect(() => {
+    if (atBottom) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages, atBottom])
+
+  const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    setAtBottom(true)
+  }
 
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-5 space-y-4 scrollbar-thin">
-      {messages.map((msg) => (
-        <ErrorBoundary key={msg.id}>
-          <MessageRow msg={msg} onSend={onSend} />
-        </ErrorBoundary>
-      ))}
+    <div style={{ flex: 1, position: 'relative', minHeight: 0, overflow: 'hidden' }}>
+      {/* Scrollable message area */}
+      <div
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="overflow-y-auto overflow-x-hidden scrollbar-thin"
+        style={{ position: 'absolute', inset: 0, padding: '20px', display: 'flex', flexDirection: 'column', gap: 16 }}
+      >
+        {messages.map((msg) => (
+          <ErrorBoundary key={msg.id}>
+            <MessageRow msg={msg} onSend={onSend} />
+          </ErrorBoundary>
+        ))}
 
-      {askPending && (
-        <AskPanel pending={askPending} onSend={onSend} />
+        {askPending && (
+          <AskPanel pending={askPending} onSend={onSend} />
+        )}
+
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Go-to-bottom button — appears when scrolled up */}
+      {!atBottom && (
+        <button
+          onClick={scrollToBottom}
+          title="Ir al final"
+          style={{
+            position: 'absolute',
+            bottom: 16,
+            right: 20,
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            background: '#28282e',
+            border: '1px solid rgba(255,255,255,0.12)',
+            color: '#aaa',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
+            fontSize: 14,
+            lineHeight: 1,
+            zIndex: 10,
+            transition: 'background 0.15s, color 0.15s',
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.background = '#3a3a44'
+            ;(e.currentTarget as HTMLElement).style.color = '#fff'
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.background = '#28282e'
+            ;(e.currentTarget as HTMLElement).style.color = '#aaa'
+          }}
+        >
+          ↓
+        </button>
       )}
-
-      <div ref={bottomRef} />
     </div>
   )
 }
