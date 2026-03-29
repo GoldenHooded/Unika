@@ -9,6 +9,7 @@ import { TimelinePanel } from './components/Chat/TimelinePanel'
 import { UsageMeter } from './components/UsageMeter'
 import { UnityStatus } from './components/UnityStatus/UnityStatus'
 import { DocEditor } from './components/DocEditor/DocEditor'
+import { KanbanBoard } from './components/Kanban/KanbanBoard'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { SettingsPanel } from './components/Settings/SettingsPanel'
 import { ContextPanel } from './components/Chat/ContextPanel'
@@ -18,7 +19,7 @@ import { useDebugStore } from './stores/debugStore'
 import { playExitSound } from './utils/sounds'
 import {
   FolderOpen, MessageSquarePlus,
-  Maximize2, Minimize2, X, Clock, Layers,
+  Maximize2, Minimize2, X, Clock, Layers, LayoutGrid,
 } from 'lucide-react'
 import { UnikaLogo } from './components/UnikaLogo'
 
@@ -85,6 +86,7 @@ export default function App() {
   const [focus, setFocus] = useState<Focus>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [contextOpen, setContextOpen] = useState(false)
+  const [boardOpen, setBoardOpen] = useState(false)
 
   // Play exit sound when Electron signals the app is closing
   useEffect(() => {
@@ -160,7 +162,7 @@ export default function App() {
               <div className="ml-auto no-drag flex items-center gap-2" style={{ marginRight: 138 }}>
                 <UsageMeter />
                 <button
-                  onClick={() => { setContextOpen(v => !v); setTimelineOpen(false) }}
+                  onClick={() => { setContextOpen(v => !v); setTimelineOpen(false); setBoardOpen(false) }}
                   className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded border transition-colors"
                   style={contextOpen
                     ? { background: 'rgba(61,133,200,0.15)', color: '#3d85c8', borderColor: 'rgba(61,133,200,0.3)' }
@@ -171,7 +173,7 @@ export default function App() {
                   <Layers size={8} />
                 </button>
                 <button
-                  onClick={() => { setTimelineOpen((v) => !v); setContextOpen(false) }}
+                  onClick={() => { setTimelineOpen(v => !v); setContextOpen(false); setBoardOpen(false) }}
                   className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded border transition-colors"
                   style={timelineOpen
                     ? { background: 'rgba(61,133,200,0.15)', color: '#3d85c8', borderColor: 'rgba(61,133,200,0.3)' }
@@ -180,6 +182,17 @@ export default function App() {
                   title="Timeline de sesión"
                 >
                   <Clock size={8} />
+                </button>
+                <button
+                  onClick={() => { setBoardOpen(v => !v); setContextOpen(false); setTimelineOpen(false) }}
+                  className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+                  style={boardOpen
+                    ? { background: 'rgba(107,203,119,0.15)', color: '#6BCB77', borderColor: 'rgba(107,203,119,0.3)' }
+                    : { background: 'rgba(255,255,255,0.04)', color: '#555', borderColor: 'rgba(255,255,255,0.06)' }
+                  }
+                  title="Tablero Kanban"
+                >
+                  <LayoutGrid size={8} />
                 </button>
                 <UnityStatus />
               </div>
@@ -205,9 +218,9 @@ export default function App() {
                         <MessageInput onSend={send} />
                       </div>
                     </div>
-                    {/* Right panel — Review (auto), Timeline or Context (manual) */}
+                    {/* Right panel — Review (auto), Board/Timeline/Context (manual) */}
                     <div style={{
-                      width: (reviewActive || timelineOpen || contextOpen) ? '43%' : '0',
+                      width: (reviewActive || timelineOpen || contextOpen || boardOpen) ? '50%' : '0',
                       flexShrink: 0,
                       transition: 'width 0.4s cubic-bezier(0.4,0,0.2,1)',
                       overflow: 'hidden',
@@ -215,6 +228,8 @@ export default function App() {
                     }}>
                       {reviewActive ? (
                         <ReviewPanel />
+                      ) : boardOpen ? (
+                        <KanbanBoard />
                       ) : timelineOpen ? (
                         <TimelinePanel />
                       ) : contextOpen ? (

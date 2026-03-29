@@ -5,9 +5,8 @@ import { DocOutline } from './DocOutline'
 import { useProjectStore } from '../../stores/projectStore'
 import { useChatStore } from '../../stores/chatStore'
 import { Code2, Eye, Save, SplitSquareHorizontal } from 'lucide-react'
-import { KanbanBoard } from '../Kanban/KanbanBoard'
 
-type DocName = 'GDD' | 'TDD' | 'GAME_CONTEXT' | 'MEMORY' | 'SESSION_LOG' | 'BOARD'
+type DocName = 'GDD' | 'TDD' | 'GAME_CONTEXT' | 'MEMORY' | 'SESSION_LOG'
 
 export function DocEditor({ onSend: _onSend }: { onSend?: (data: object) => void }) {
   const activeProjectId = useProjectStore(s => s.activeProjectId)
@@ -82,7 +81,6 @@ export function DocEditor({ onSend: _onSend }: { onSend?: (data: object) => void
     { name: 'GAME_CONTEXT', label: 'Contexto' },
     { name: 'MEMORY',       label: 'Memoria'  },
     { name: 'SESSION_LOG',  label: 'Log'      },
-    { name: 'BOARD' as any, label: 'Board'    },
   ]
 
   return (
@@ -120,103 +118,93 @@ export function DocEditor({ onSend: _onSend }: { onSend?: (data: object) => void
           ))}
         </div>
 
-        {(activeDoc as string) !== 'BOARD' && (
-          <>
-            {/* View mode buttons — Unity toolbar icon buttons */}
-            <div className="flex items-center gap-0.5 px-1.5 border-l" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
-              {[
-                { m: 'edit' as const, Icon: Code2, title: 'Editar' },
-                { m: 'split' as const, Icon: SplitSquareHorizontal, title: 'Split' },
-                { m: 'preview' as const, Icon: Eye, title: 'Vista previa' },
-              ].map(({ m, Icon, title }) => (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className="p-1 rounded transition-colors"
-                  style={{
-                    color: mode === m ? '#EEEEEE' : '#888',
-                    background: mode === m ? '#585858' : 'transparent',
-                  }}
-                  onMouseEnter={e => {
-                    if (mode !== m) (e.currentTarget as HTMLElement).style.background = '#474747'
-                  }}
-                  onMouseLeave={e => {
-                    if (mode !== m) (e.currentTarget as HTMLElement).style.background = 'transparent'
-                  }}
-                  title={title}
-                >
-                  <Icon size={11} />
-                </button>
-              ))}
-            </div>
-
-            {/* Save button */}
+        {/* View mode buttons — Unity toolbar icon buttons */}
+        <div className="flex items-center gap-0.5 px-1.5 border-l" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+          {[
+            { m: 'edit' as const, Icon: Code2, title: 'Editar' },
+            { m: 'split' as const, Icon: SplitSquareHorizontal, title: 'Split' },
+            { m: 'preview' as const, Icon: Eye, title: 'Vista previa' },
+          ].map(({ m, Icon, title }) => (
             <button
-              onClick={save}
-              disabled={saving}
-              className="flex items-center gap-1 px-2 py-1 text-[11px] border-l transition-colors"
-              style={{ borderColor: 'rgba(255,255,255,0.07)', color: '#888' }}
+              key={m}
+              onClick={() => setMode(m)}
+              className="p-1 rounded transition-colors"
+              style={{
+                color: mode === m ? '#EEEEEE' : '#888',
+                background: mode === m ? '#585858' : 'transparent',
+              }}
               onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.background = '#474747'
-                ;(e.currentTarget as HTMLElement).style.color = '#EEEEEE'
+                if (mode !== m) (e.currentTarget as HTMLElement).style.background = '#474747'
               }}
               onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.background = 'transparent'
-                ;(e.currentTarget as HTMLElement).style.color = '#888'
+                if (mode !== m) (e.currentTarget as HTMLElement).style.background = 'transparent'
               }}
-              title="Guardar (Ctrl+S)"
+              title={title}
             >
-              <Save size={11} />
-              {lastSaved && (
-                <span className="text-[10px]" style={{ color: '#888' }}>
-                  {lastSaved.toLocaleTimeString()}
-                </span>
-              )}
+              <Icon size={11} />
             </button>
-          </>
-        )}
+          ))}
+        </div>
+
+        {/* Save button */}
+        <button
+          onClick={save}
+          disabled={saving}
+          className="flex items-center gap-1 px-2 py-1 text-[11px] border-l transition-colors"
+          style={{ borderColor: 'rgba(255,255,255,0.07)', color: '#888' }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.background = '#474747'
+            ;(e.currentTarget as HTMLElement).style.color = '#EEEEEE'
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.background = 'transparent'
+            ;(e.currentTarget as HTMLElement).style.color = '#888'
+          }}
+          title="Guardar (Ctrl+S)"
+        >
+          <Save size={11} />
+          {lastSaved && (
+            <span className="text-[10px]" style={{ color: '#888' }}>
+              {lastSaved.toLocaleTimeString()}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Editor / Preview */}
       <div className="flex-1 overflow-hidden flex">
-        {(activeDoc as string) === 'BOARD' ? (
-          <KanbanBoard />
-        ) : (
-          <>
-            {(mode === 'edit' || mode === 'split') && (
-              <textarea
-                className={`${mode === 'split' ? 'w-1/2 border-r' : 'w-full'} h-full resize-none outline-none scrollbar-thin p-3 font-mono text-[11px]`}
-                style={{
-                  background: '#141418',
-                  color: '#D2D2D2',
-                  borderColor: 'rgba(255,255,255,0.07)',
-                  lineHeight: '1.6',
-                }}
-                value={content}
-                onChange={e => setContent(e.target.value)}
-                placeholder="Escribe aquí en Markdown..."
-                spellCheck={false}
-              />
-            )}
-            {(mode === 'preview' || mode === 'split') && (
-              <div className={`${mode === 'split' ? 'w-1/2' : 'w-full'} h-full relative`}>
-                <div
-                  ref={previewRef}
-                  className="h-full overflow-y-auto p-4 scrollbar-thin"
-                  style={{ background: '#1e1e22' }}
-                >
-                  <div className="prose prose-invert prose-sm max-w-none">
-                    {extractGuiElements(content).map((part, i) =>
-                      part.type === 'mermaid'
-                        ? <MermaidBlock key={i} code={part.content} />
-                        : <div key={i} dangerouslySetInnerHTML={{ __html: renderMarkdown(part.content) }} />
-                    )}
-                  </div>
-                </div>
-                <DocOutline content={content} previewRef={previewRef} />
+        {(mode === 'edit' || mode === 'split') && (
+          <textarea
+            className={`${mode === 'split' ? 'w-1/2 border-r' : 'w-full'} h-full resize-none outline-none scrollbar-thin p-3 font-mono text-[11px]`}
+            style={{
+              background: '#141418',
+              color: '#D2D2D2',
+              borderColor: 'rgba(255,255,255,0.07)',
+              lineHeight: '1.6',
+            }}
+            value={content}
+            onChange={e => setContent(e.target.value)}
+            placeholder="Escribe aquí en Markdown..."
+            spellCheck={false}
+          />
+        )}
+        {(mode === 'preview' || mode === 'split') && (
+          <div className={`${mode === 'split' ? 'w-1/2' : 'w-full'} h-full relative`}>
+            <div
+              ref={previewRef}
+              className="h-full overflow-y-auto p-4 scrollbar-thin"
+              style={{ background: '#1e1e22' }}
+            >
+              <div className="prose prose-invert prose-sm max-w-none">
+                {extractGuiElements(content).map((part, i) =>
+                  part.type === 'mermaid'
+                    ? <MermaidBlock key={i} code={part.content} />
+                    : <div key={i} dangerouslySetInnerHTML={{ __html: renderMarkdown(part.content) }} />
+                )}
               </div>
-            )}
-          </>
+            </div>
+            <DocOutline content={content} previewRef={previewRef} />
+          </div>
         )}
       </div>
 
