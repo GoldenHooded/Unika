@@ -9,6 +9,9 @@ datas_all    = []
 binaries_all = []
 hidden_all   = []
 
+# Bundle the Unity C# plugin so UNITY_SETUP works in compiled builds
+datas_all += [('../unity-plugin', 'unity-plugin')]
+
 # Collect uvicorn completely (uses dynamic imports for protocols/loops)
 for pkg in ('uvicorn', 'fastapi', 'starlette', 'anyio', 'anthropic', 'httpx', 'httpcore'):
     d, b, h = collect_all(pkg)

@@ -5,14 +5,19 @@ Unity auto-recompiles, and the WebSocket bridge auto-connects.
 """
 from __future__ import annotations
 import shutil
+import sys
 from pathlib import Path
 from typing import Any, Dict
 
 from backend.commands import ArgSchema, Command, registry
 from backend.events import bus
 
-# Plugin source files (in unity-plugin/ directory)
-_PLUGIN_SRC = Path(__file__).parent.parent.parent / "unity-plugin" / "Editor" / "Unika"
+# Plugin source files — path differs between dev and PyInstaller compiled builds
+if getattr(sys, 'frozen', False):
+    # PyInstaller onedir: resources are bundled next to the executable
+    _PLUGIN_SRC = Path(sys.executable).parent / "unity-plugin" / "Editor" / "Unika"
+else:
+    _PLUGIN_SRC = Path(__file__).parent.parent.parent / "unity-plugin" / "Editor" / "Unika"
 
 
 def _execute(args: Dict[str, Any]) -> str:
