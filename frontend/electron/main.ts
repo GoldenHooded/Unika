@@ -95,9 +95,11 @@ function startBackend() {
       cwd:  resourcesPath,
     })
   } else {
-    // Development: run directly with python
-    const projectRoot = join(__dirname, '../../..')
+    // Development: pre-compile bytecode (no-op if already up to date), then start
+    const projectRoot  = join(__dirname, '../../..')
     const backendScript = join(projectRoot, 'backend', 'server.py')
+    // Compile silently in background — won't block window creation since we poll /health
+    exec(`python -m compileall -q "${join(projectRoot, 'backend')}"`, { cwd: projectRoot }, () => {})
     backendProcess = spawn('python', [backendScript], {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: { ...process.env },
@@ -108,6 +110,29 @@ function startBackend() {
   backendProcess.stdout?.on('data', (d) => process.stdout.write(`[Backend] ${d}`))
   backendProcess.stderr?.on('data', (d) => process.stderr.write(`[Backend] ${d}`))
   backendProcess.on('exit', (code) => console.log(`[Backend] exited with code ${code}`))
+}
+
+function waitForBackend(onReady: () => void, maxWaitMs = 15000) {
+  const { request } = require('http') as typeof import('http')
+  const interval = 150
+  let elapsed = 0
+  const poll = () => {
+    const req = request({ host: '127.0.0.1', port: 8765, path: '/health', method: 'GET' }, (res) => {
+      if (res.statusCode === 200) {
+        onReady()
+      } else {
+        retry()
+      }
+    })
+    req.on('error', retry)
+    req.end()
+  }
+  const retry = () => {
+    elapsed += interval
+    if (elapsed >= maxWaitMs) { onReady(); return } // fallback: open anyway
+    setTimeout(poll, interval)
+  }
+  poll()
 }
 
 app.whenReady().then(() => {
@@ -121,7 +146,7 @@ app.whenReady().then(() => {
   }
 
   startBackend()
-  setTimeout(createWindow, 2000)
+  waitForBackend(createWindow)
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
