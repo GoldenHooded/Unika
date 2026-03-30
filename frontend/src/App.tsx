@@ -148,9 +148,10 @@ export default function App() {
                 isMaximized={true}
               />
               {/* Centered max-width container — matches chat layout */}
-            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              <div style={{ width: '100%', maxWidth: 1100, margin: '0 auto', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <DocEditor onSend={send} />
+              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div style={{ width: '100%', maxWidth: 1100, margin: '0 auto', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                  <DocEditor onSend={send} />
+                </div>
               </div>
             </div>
           </>
